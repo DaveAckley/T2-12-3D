@@ -1,0 +1,4 @@
+This 'output' directory contains content generated from the 'src'
+directory.  Normally such files would not be added to the repo, but we
+want some of its content, such as the STL files, to be available
+without requiring openscad.
