@@ -7,10 +7,12 @@ endif
 
 $(TOPTARGETS): $(SUBDIRS)
 
+clean:
+	@rm -f *~ .*~
+
+realclean:	clean
+
 $(SUBDIRS):
 	@$(MAKE) -C $@ $(MAKECMDGOALS)
-
-clean:
-	@rm -f *~
 
 .PHONY: $(TOPTARGETS) $(SUBDIRS)
