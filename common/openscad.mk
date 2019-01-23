@@ -21,7 +21,7 @@ view:	$(STLFILES)
 	meshlab $<
 
 clean:	FORCE
-	@rm -f @~
+	@rm -f *~
 
 realclean:	clean
 	@rm -f $(FINAL_STL_FILES) $(DRAFT_STL_FILES)
