@@ -481,14 +481,15 @@ module throughHoleCornerPost(radius, zrot, reverse, finalsubtract)
                 }
               }
               // screw head countersink
-             translate([0,0,toBoardMM-m3ScrewHeadCountersinkDepthMM]) {
+              translate([0,0,toBoardMM-m3ScrewHeadCountersinkDepthMM]) {
                 linear_extrude(height=m3ScrewHeadCountersinkDepthMM+1) {
                   circle(r=m3ScrewHeadRadiusMM);
                 }
                 // slope hole bottom to help bridging
-                translate([0,0,-.9]) {
-              cylinder(r1=1,r2=1.1*m3ScrewHeadRadiusMM,ht=1);
-            }
+                slopeDepthMM = 1;
+                #translate([0,0,-slopeDepthMM]) {
+                  cylinder(r1=m3ScrewHoleRadiusMM,r2=m3ScrewHeadRadiusMM,ht=slopeDepthMM);
+                }
              }
             } else {
               linear_extrude(height=toBoardMM) {
