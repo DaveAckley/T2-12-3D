@@ -8,12 +8,13 @@ else
   STLFILES:=$(DRAFT_STL_FILES)
 endif
 ALLDEPS+=Makefile $(ROOTDIR)/common/openscad.mk
+EPOCH15:=$(shell expr `date +%s` / 1000)
 
 $(BINDIR)/%.stl:	%.scad $(ALLDEPS)
-	openscad -o $@ $< 
+	openscad -D BUILD_TIME_STAMP=\"$(EPOCH15)F\" -o $@ $< 
 
 $(BINDIR)/%-DRAFT.stl:	%.scad $(ALLDEPS)
-	openscad -o $@ $< 
+	openscad -D BUILD_TIME_STAMP=\"$(EPOCH15)D\" -o $@ $< 
 
 build:	$(STLFILES)
 
