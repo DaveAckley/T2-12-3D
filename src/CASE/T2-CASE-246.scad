@@ -585,6 +585,43 @@ module stretcher(thickness,mirror) {
   }
 }
 
+module lockingButton() {
+  translate([0,0,faceplateMM[2]]) {
+    scale([1,1,-1]) {
+      // Make a brim 'by hand' to help stick the buttons
+      brimThicknessMM = 0.2; // Keep less than 1.5*firstLayerHeight, I expect
+      brimOuterMM = 1.5*buttonPlateDiameterMM;
+      brimInnerMM = 1.08*buttonPlateDiameterMM;
+      brimBridgeMM = 0.6;
+      linear_extrude(height=brimThicknessMM) {
+        union() {
+          difference() {
+            circle(d=brimOuterMM);
+            circle(d=brimInnerMM);
+          }
+          for (r = [0, 90]) {
+            rotate([0,0,r])
+              square([brimBridgeMM,brimOuterMM-1],center=true);
+          }
+        }
+      }
+           
+      linear_extrude(height=buttonPlateThicknessMM) {
+        circle(d=buttonPlateDiameterMM);
+      }
+      linear_extrude(height=in2MM(buttonShaftLengthInches+buttonSurfaceProtrusionInches)) {
+        circle(d=in2MM(buttonShaftDiameterInches));
+      }
+      translate([buttonLockXOffsetMM,0,buttonLockZOffsetMM]) {
+        rotate([0,45,0]) {
+          edge=buttonLockEdgeMM;
+          cube([edge,edge,edge],center=true);
+        }
+      }
+    }
+  }
+}
+
 module case10()
 {
   topRad = postRadiusMM/5;
@@ -899,7 +936,7 @@ module case10()
 
   union() {
     // Add the version time stamp
-    #translate([102.8, 55.2, -0.75]) {
+    translate([102.8, 55.2, -0.75]) {
       rotate(0) {
         xyscale = .4;
         zscale = 1.1;
@@ -909,27 +946,13 @@ module case10()
         }
       }
     }
-
   }
 
-  union() {
+#  union() {
     // Add the pushbuttons in the middle
     for (i = [0 : 1]) {
-      translate(faceplateMM/2+[in2MM((2*i-1)),0,faceplateMM[2]/2]) {
-        scale([1,1,-1]) {
-          linear_extrude(height=buttonPlateThicknessMM) {
-            circle(d=buttonPlateDiameterMM);
-          }
-#          linear_extrude(height=in2MM(buttonShaftLengthInches+buttonSurfaceProtrusionInches)) {
-            circle(d=in2MM(buttonShaftDiameterInches));
-          }
-          translate([buttonLockXOffsetMM,0,buttonLockZOffsetMM]) {
-            rotate([0,45,0]) {
-              edge=buttonLockEdgeMM;
-              cube([edge,edge,edge],center=true);
-            }
-          }
-        }
+      translate(faceplateMM/2+[in2MM((2*i-1)),0,facePlateMM[2]]) {
+        lockingButton();
       }
     }
   }
@@ -937,9 +960,11 @@ module case10()
 
 $fn=50;
 
-translate([0,0,6.45]) {
-  scale([1,1,-1])  // Flip for printing face down
-    case10();
+translate([0,0,faceplateMM[2]]) {
+  scale([1,1,-1]) {  // Flip for printing face down
+    *case10();
+    lockingButton();
+  }
 }
 
 
