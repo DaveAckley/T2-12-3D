@@ -152,7 +152,7 @@ buttonLockEdgeMM = 2;
 //// Power LED light pipe seats
 glowHoleInfoInches =
   [
-   [2.36, .13,  0.99*(1/8.0)], // +-few% off 1/8"  Not sure why the two holes don't print
+   [2.36, .13,  0.98*(1/8.0)], // +-few% off 1/8"  Not sure why the two holes don't print
    [0.14, 2.35, 1.01*(1/8.0)], // +-few% off 1/8" the same!  W runs tighter than N!
    ];
 glowHoleDepthInches = 0.1;
