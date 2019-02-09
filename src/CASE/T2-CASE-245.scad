@@ -3,7 +3,7 @@
 // Licensed under GPL-3
 
 echo("This is going to take a while");
-
+echo( BUILD_TIME_STAMP );
 function in2MM ( vec) = 25.4 * vec;
 function max3 ( v ) = max(v[0],v[1],v[2]);
 function easeRadius ( vec, pct) = pct * max3(vec) / 100;
@@ -14,7 +14,7 @@ m3HoleShiftYMM = 2.0;
 
 m3ScrewHoleDiameterMM=3.4 + 0.1;  // According to internet, plus 0.1
 m3ScrewHoleRadiusMM=m3ScrewHoleDiameterMM/2;
-m3ScrewHeadDiameterMM=5.5 + 0.15;  // 5.5: socket cap; 5.6: narrow 'cheese head'; 5.7: socket cap; 6: philips
+m3ScrewHeadDiameterMM=5.5 + 0.2;  // 5.5: socket cap; 5.6: narrow 'cheese head'; 5.7: also? socket cap; 6: philips
 m3ScrewHeadRadiusMM=m3ScrewHeadDiameterMM/2;
 m3ScrewHeadCountersinkDepthMM=3.0 + 0.1;  // Makes 25mm screw into 28mm
 
@@ -58,10 +58,10 @@ displayOffsetInches = [0.410, 0.658, .0];  // Lower left corner offset relative 
 //displayOffsetInches = [0.410, 0.670, .0];  // Lower left corner offset relative to board
 //displayOffsetInches = [0.410, 0.700, .0];  // Lower left corner offset relative to board
 displayEasePct = .1;
-displayVizDimInches = [2.967, 2.008, 0.025];
-displayVizOffsetInches = [0.227, 0.087, -.044];   // Lower left corner offset relative to display
+displayVizDimInches = [2.957, 2.008, 0.025];
+displayVizOffsetInches = [0.257, 0.087, -.044];   // Lower left corner offset relative to display
 
-// Shrounded 2x8 0.1" pin header with polarizing key
+// Shrouded 2x8 0.1" pin header with polarizing key
 //  pinHeaderFootprintInches = [.945, .285]
 fullpinHeaderDimInches = [1.16, 0.355, 0.360];
 //fullpinHeaderDimInches = [1.12, 0.355, 0.345];
@@ -100,16 +100,16 @@ curtainWallExtraOutsetInches = 0.01;
 curtainWallHeightInches = postHeightInches-0.03;
 curtainWallInfoInches =
   [
-   // South curtain wall: x, y, len, rot, emboss, atscale, erot
+   // South curtain wall: x, y, len, rot, emboss, atscale, erot, font
    [1.365, boardDimInches[1]-curtainWallThicknessInches+curtainWallExtraOutsetInches, 1.355, 0, 
-    "MFM", 1.12, 17.1, 9, 0], 
+    "MFM", 1.25, 17.1, 9.1, "BitStream Vera Sans Mono:style=bold"], 
    [boardDimInches[0]-.15-.24, boardDimInches[1]-curtainWallThicknessInches, 0.24, 0], // South east curtain wall: x, y, len, rot
    [0.15, boardDimInches[1]-curtainWallThicknessInches, 0.067, 0], // South west curtain wall: x, y, len, rot
    [1.68, 0.001, .81, 0],     // North curtain wall: x, y, len, rot
    [0.15, 0, .399, 0],     // North west curtain wall: x, y, len, rot
    [boardDimInches[0]-.46-.15, 0, .46, 0],     // North east curtain wall: x, y, len, rot
    [-2.15, boardDimInches[0]-curtainWallThicknessInches, .83, -90, 
-    "T2", 1.25, 10.4, 8.6],     // East curtain wall: x, y, len, rot
+    "T2", 1.25, 10.4, 8.6, "Impact"],     // East curtain wall: x, y, len, rot
    [0.15, -boardDimInches[0], .104, 90],     // East north curtain wall: x, y, len, rot
    [boardDimInches[1]-.23-.15, -boardDimInches[0], .23, 90],     // East south curtain wall: x, y, len, rot
    [-boardDimInches[1]+.15, 0, 1.15, -90],     // West curtain wall: x, y, len, rot
@@ -146,14 +146,14 @@ buttonPlateDiameterMM=in2MM(0.24);
 buttonPlateThicknessMM=in2MM(0.06);
 
 buttonLockXOffsetMM = 1.3;
-buttonLockZOffsetMM = 9.0;
+buttonLockZOffsetMM = 8.0;
 buttonLockEdgeMM = 2;
 
 //// Power LED light pipe seats
 glowHoleInfoInches =
   [
-   [2.36, .13, 1.03*(1/8.0)], // few% over 1/8"
-   [0.14, 2.35, 1.03*(1/8.0)], // few% over 1/8"
+   [2.36, .13,  0.99*(1/8.0)], // +-few% off 1/8"  Not sure why the two holes don't print
+   [0.14, 2.35, 1.01*(1/8.0)], // +-few% off 1/8" the same!  W runs tighter than N!
    ];
 glowHoleDepthInches = 0.1;
 glowHoleBoxInches = [0.2, 0.2, 2.27, .09];
@@ -342,7 +342,7 @@ module debugShaftHole(height,depth)
   }
 }
 
-module curtainWall(widthMM,emboss,embscale,x,y,rot)
+module curtainWall(widthMM,emboss,embscale,x,y,rot,font)
 {
   //  echo ("curtainWall ",widthMM,emboss,embscale,x,y,rot);
   thickness = in2MM(curtainWallThicknessInches);
@@ -358,7 +358,7 @@ module curtainWall(widthMM,emboss,embscale,x,y,rot)
             xyscale = embscale;
             scale([xyscale,-xyscale,zscale]) {
               linear_extrude(height=thickness+fudge)
-                text(emboss,direction="ltr",font="Impact",halign="center",valign="center");
+                text(emboss,direction="ltr",font=font,halign="center",valign="center");
             }
           }
         }
@@ -790,16 +790,40 @@ module case10()
           rotate(i[3],[0,0,1]) {
             translate([0,0,faceplateMM[2]]) { // z origin to top of faceplate
               translate([in2MM(i[0]),in2MM(i[1]),-in2MM(curtainWallHeightInches)]) { // down by wall height
-                curtainWall(in2MM(i[2]),i[4],i[5],i[6],i[7],i[3]);
+                curtainWall(in2MM(i[2]),i[4],i[5],i[6],i[7],i[3],i[8]);
               }
             }
           }
         }
-        // Add a special reinforcement rib on the weak N curtain wall
+        // Add a few special reinforcement ribs on the weak N curtain wall
         {
           translate([0,0,faceplateMM[2]]) { // z origin to top of faceplate
-            translate([in2MM(2.15),in2MM(0.03),-in2MM(curtainWallHeightInches)]) { // down by wall height
+            translate([in2MM(2.07),in2MM(0.03),-in2MM(curtainWallHeightInches)]) { // down by wall height
               cube([1.7,1,in2MM(curtainWallHeightInches)]);
+            }
+            translate([in2MM(2.43),in2MM(0.03),-in2MM(curtainWallHeightInches)]) { // down by wall height
+              cube([1.7,1,in2MM(curtainWallHeightInches)]);
+            }
+            #translate([in2MM(1.69),in2MM(0.03),-in2MM(curtainWallHeightInches)]) { // down by wall height
+              cube([1.7,1,in2MM(curtainWallHeightInches)]);
+            }
+          }
+        }
+
+        // Some special reinforcement ribs for the weak S curtain wall too
+        {
+          translate([0,0,faceplateMM[2]]) { // z origin to top of faceplate
+            translate([46.2,81.4,-in2MM(curtainWallHeightInches)+0.0]) { // down by wall height
+              cube([1.4,0.9,in2MM(curtainWallHeightInches)]);
+              translate([10,0,0]) {
+                #cube([1.4,0.9,in2MM(curtainWallHeightInches)]);
+              }
+              translate([21,0,1.5]) {
+                #cube([1.4,0.9,in2MM(curtainWallHeightInches)-1.5]);
+              }
+              translate([-11.3,0,1.5]) {
+                #cube([1.4,0.9,in2MM(curtainWallHeightInches)-1.5]);
+              }
             }
           }
         }
@@ -899,15 +923,22 @@ module case10()
       for (i = glowHoleInfoInches) {
         translate([in2MM(i[0]),in2MM(i[1]),0]) {
           buttonHole(in2MM(i[2]));
+#          linear_extrude(height=10) {
+            shrinkFrac = 0.7;
+            circle(in2MM(shrinkFrac*i[2]),$fn=3);
+            rotate([0,0,60])
+              circle(in2MM(shrinkFrac*i[2]),$fn=3);
+          }
           bevelHole(in2MM(i[2]),13,65); // Ease glowrod insertion a bit
         }
       }
 
       // Subtract the embossed labels
       if (1) {
+        nsoffset = .5;
         embossDepth = 1.0;
         zscale = 1.1;
-        translate([49, 6.5, faceplateMM[2]-embossDepth]) {
+        translate([52.0-nsoffset, 6.4, faceplateMM[2]-embossDepth]) {
           rotate(0) {
             xyscale = .75;
             scale([xyscale,-xyscale,zscale]) {
@@ -917,7 +948,7 @@ module case10()
           }
         }
 
-        translate([56, 80, faceplateMM[2]-embossDepth]) {
+        translate([54.5+nsoffset, 80, faceplateMM[2]-embossDepth]) {
           rotate(0) {
             xyscale = .70;
             scale([xyscale,-xyscale,zscale]) {
@@ -937,8 +968,8 @@ module case10()
           }
         }
 
-        translate([104.0, 48.0, faceplateMM[2]-embossDepth]) {
-          xyscale = .88;
+        translate([104.0, 47.0, faceplateMM[2]-embossDepth]) {
+          xyscale = .75;
           scale([xyscale,-xyscale,zscale]) {
             linear_extrude(height=embossDepth+1)
               text("E",direction="ttb",font="Gillius ADF",halign="center",valign="center");
@@ -957,7 +988,10 @@ module case10()
               }
             }
           }
+          perfShiftXMM = 2.5;
+          perfShiftYMM = 0;
           union() {
+            translate([perfShiftXMM,perfShiftYMM,0]) {
             rotate([0,0,perforationInfoMM[6]]) {
               x = -10; y = -80; w = 150; h = 150;
               for (xs = [x : perforationInfoMM[0] : x + w]) {
@@ -971,6 +1005,7 @@ module case10()
               }
             }
           }
+          }
         }
       }
     }
@@ -978,6 +1013,21 @@ module case10()
 
   ////
   // Late additions
+
+  union() {
+    // Add the version time stamp
+    #translate([102.8, 55.2, -0.75]) {
+      rotate(0) {
+        xyscale = .4;
+        zscale = 1.1;
+        scale([xyscale,xyscale,zscale]) {
+          linear_extrude(height=3)
+            text(BUILD_TIME_STAMP,direction="ttb",font="Impact",halign="center",valign="center");
+        }
+      }
+    }
+
+  }
 
   union() {
     // Add the pushbuttons in the middle
