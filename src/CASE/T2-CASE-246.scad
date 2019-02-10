@@ -586,7 +586,7 @@ module stretcher(thickness,mirror) {
 }
 
 module lockingButton() {
-  translate([0,0,faceplateMM[2]]) {
+  translate([0,0,faceplateMM[2]/2]) {
     scale([1,1,-1]) {
       // Make a brim 'by hand' to help stick the buttons
       brimThicknessMM = 0.2; // Keep less than 1.5*firstLayerHeight, I expect
@@ -951,7 +951,7 @@ module case10()
 #  union() {
     // Add the pushbuttons in the middle
     for (i = [0 : 1]) {
-      translate(faceplateMM/2+[in2MM((2*i-1)),0,facePlateMM[2]]) {
+      translate(faceplateMM/2+[in2MM((2*i-1)),0,0]) {
         lockingButton();
       }
     }
@@ -962,8 +962,8 @@ $fn=50;
 
 translate([0,0,faceplateMM[2]]) {
   scale([1,1,-1]) {  // Flip for printing face down
-    *case10();
-    lockingButton();
+    case10();
+    *lockingButton();
   }
 }
 
