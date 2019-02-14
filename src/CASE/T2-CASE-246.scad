@@ -131,9 +131,9 @@ curtainWallInfoInches =
 // Info for the pushbutton shafts and the trapped pushbuttons
 
 buttonShaftInfoInches =
-  [ // X    Y    DIAMETER
-   [ 1.96, 3.11], // wake button
-   [ 0.14, 2.71], // pwr button
+  [ // X    Y    Rotation
+   [ 1.96, 3.11, 0], // wake button
+   [ 0.14, 2.71, 0], // pwr button
    ];
 buttonShaftHoleThicknessInches = 0.16;
 buttonShaftWallThicknessInches = 0.035;
@@ -143,10 +143,10 @@ buttonSurfaceProtrusionInches = 0.13;
 buttonShaftDiameterInches = 0.80 * buttonShaftHoleThicknessInches;
 
 buttonPlateDiameterMM=in2MM(0.24);
-buttonPlateThicknessMM=in2MM(0.06);
+buttonPlateThicknessMM=1.5;
 
 buttonLockXOffsetMM = 1.3;
-buttonLockZOffsetMM = 8.0;
+buttonLockZOffsetMM = 7.5;
 buttonLockEdgeMM = 2;
 
 //// Power LED light pipe seats
@@ -442,7 +442,7 @@ module buttonHole(innerDiameterMM,lockNotch=false)
 }
 
 // roundedRect is centered by default
-module roundedRect(size, radius, centered = true)
+module roundedRect(size, radius, centered = true, betriangle = false)
 {
   x = size[0];
   y = size[1];
@@ -455,8 +455,12 @@ module roundedRect(size, radius, centered = true)
       // corner circles indented so the radius hits the desired size
       translate([(-x/2)+r, (-y/2)+r, 0]) circle(r=r);
       translate([(+x/2)-r, (-y/2)+r, 0]) circle(r=r);
-      translate([(-x/2)+r, (+y/2)-r, 0]) circle(r=r);
-      translate([(+x/2)-r, (+y/2)-r, 0]) circle(r=r);
+      if (betriangle) {
+        translate([0, (+y/2)-r, 0]) circle(r=r);
+      } else {
+        translate([(-x/2)+r, (+y/2)-r, 0]) circle(r=r);
+        translate([(+x/2)-r, (+y/2)-r, 0]) circle(r=r);
+      }
     }
 }
 
@@ -588,27 +592,16 @@ module stretcher(thickness,mirror) {
 module lockingButton() {
   translate([0,0,faceplateMM[2]/2]) {
     scale([1,1,-1]) {
-      // Make a brim 'by hand' to help stick the buttons
-      brimThicknessMM = 0.2; // Keep less than 1.5*firstLayerHeight, I expect
-      brimOuterMM = 1.5*buttonPlateDiameterMM;
-      brimInnerMM = 1.08*buttonPlateDiameterMM;
-      brimBridgeMM = 0.6;
-      linear_extrude(height=brimThicknessMM) {
-        union() {
-          difference() {
-            circle(d=brimOuterMM);
-            circle(d=brimInnerMM);
-          }
-          for (r = [0, 90]) {
-            rotate([0,0,r])
-              square([brimBridgeMM,brimOuterMM-1],center=true);
-          }
-        }
-      }
-           
       linear_extrude(height=buttonPlateThicknessMM) {
         circle(d=buttonPlateDiameterMM);
       }
+      buttonPusherLengthMM=1.5*buttonPlateDiameterMM;
+      buttonPlateRadiusMM = buttonPlateDiameterMM/2;
+      buttonShaftRadiusMM = in2MM(buttonShaftDiameterInches)/2;
+      buttonPusherWidthMM = buttonPlateDiameterMM;
+      rotate([0,0,0])
+      translate([0,buttonPusherLengthMM/2-buttonShaftRadiusMM,buttonPlateThicknessMM/2])
+        roundedRect([buttonPusherWidthMM,buttonPusherLengthMM,buttonPlateThicknessMM],1.75,true, true);
       linear_extrude(height=in2MM(buttonShaftLengthInches+buttonSurfaceProtrusionInches)) {
         circle(d=in2MM(buttonShaftDiameterInches));
       }
@@ -836,6 +829,7 @@ module case10()
       // Subtract the pushbutton shafts
       for (i = buttonShaftInfoInches) {
         translate([in2MM(i[0]),in2MM(i[1]),0])
+          rotate([0,0,i[2]])
           buttonHole(in2MM(buttonShaftHoleThicknessInches),true);
       }
 
