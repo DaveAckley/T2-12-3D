@@ -152,8 +152,8 @@ buttonLockEdgeMM = 2;
 //// Power LED light pipe seats
 glowHoleInfoInches =
   [
-   [2.36, .13,  0.98*(1/8.0)], // +-few% off 1/8"  Not sure why the two holes don't print
-   [0.14, 2.35, 1.01*(1/8.0)], // +-few% off 1/8" the same!  W runs tighter than N!
+   [2.36, .13,  1.07*(1/8.0), 30], // +-few% off 1/8" 
+   [0.14, 2.35, 1.07*(1/8.0), -90], // +-few% off 1/8"
    ];
 glowHoleDepthInches = 0.1;
 glowHoleBoxInches = [0.2, 0.2, 2.27, .09];
@@ -232,6 +232,33 @@ postRadiusMM = 4.5;
 belowBoardMM = 4;
 
 manyMM = 5000; // A large value for object dimensions used in subtractions
+
+module arc(radius, thick, angle) {
+  intersection(){
+    union(){
+      rights = floor(angle/90);
+      remain = angle-rights*90;
+      if(angle > 90){
+        for(i = [0:rights-1]){
+          rotate(i*90-(rights-1)*90/2){
+            polygon([[0, 0], [radius+thick, (radius+thick)*tan(90/2)], [radius+thick, -(radius+thick)*tan(90/2)]]);
+          }
+        }
+        fudgeDeg=0.001;  // XXXX UNDER-ROTATING TO ENSURE MANIFOLD, TOTAL ANGLE WARNING
+        rotate(-(rights)*90/2+fudgeDeg)
+          polygon([[0, 0], [radius+thick, 0], [radius+thick, -(radius+thick)*tan(remain/2)]]);
+        rotate((rights)*90/2-fudgeDeg)
+          polygon([[0, 0], [radius+thick, (radius+thick)*tan(remain/2)], [radius+thick, 0]]);
+      }else{
+        polygon([[0, 0], [radius+thick, (radius+thick)*tan(angle/2)], [radius+thick, -(radius+thick)*tan(angle/2)]]);
+      }
+    }
+    difference(){
+      circle(radius+thick);
+      circle(radius);
+    }
+  }
+}
 
 module edgeRounder()
 {
@@ -615,6 +642,34 @@ module lockingButton() {
   }
 }
 
+module glowHoleShaftIN(i) {
+
+  translate([in2MM(i[0]),in2MM(i[1]),0]) {
+    buttonHole(in2MM(i[2]));
+    *linear_extrude(height=10) {
+      shrinkFrac = 0.7;
+      circle(in2MM(shrinkFrac*i[2]),$fn=3);
+      rotate([0,0,60])
+        circle(in2MM(shrinkFrac*i[2]),$fn=3);
+    }
+    bevelHole(in2MM(i[2]),13,40); // Ease glowrod insertion a bit
+
+    rotate([0,0,i[3]]) {
+      reliefArcRadiusMM = 3.0;
+      reliefArcThicknessMM = 0.6;
+      reliefArcDegrees = 160;
+      reliefArcGapMM = 0.7;
+      translate([0,0,-1]) {
+        rotate([0,0,90]) {
+          linear_extrude(height=10) arc(reliefArcRadiusMM,reliefArcThicknessMM, reliefArcDegrees);
+        }
+      }
+      translate([0,reliefArcRadiusMM/2,0])
+        cube([reliefArcGapMM,1.1*reliefArcRadiusMM,30],center=true);
+    }
+  }
+}
+
 module case10()
 {
   topRad = postRadiusMM/5;
@@ -717,7 +772,7 @@ module case10()
             translate([in2MM(2.43),in2MM(0.03),-in2MM(curtainWallHeightInches)]) { // down by wall height
               cube([1.7,1,in2MM(curtainWallHeightInches)]);
             }
-            #translate([in2MM(1.69),in2MM(0.03),-in2MM(curtainWallHeightInches)]) { // down by wall height
+            translate([in2MM(1.69),in2MM(0.03),-in2MM(curtainWallHeightInches)]) { // down by wall height
               cube([1.7,1,in2MM(curtainWallHeightInches)]);
             }
           }
@@ -729,13 +784,13 @@ module case10()
             translate([46.2,81.4,-in2MM(curtainWallHeightInches)+0.0]) { // down by wall height
               cube([1.4,0.9,in2MM(curtainWallHeightInches)]);
               translate([10,0,0]) {
-                #cube([1.4,0.9,in2MM(curtainWallHeightInches)]);
+                cube([1.4,0.9,in2MM(curtainWallHeightInches)]);
               }
               translate([21,0,1.5]) {
-                #cube([1.4,0.9,in2MM(curtainWallHeightInches)-1.5]);
+                cube([1.4,0.9,in2MM(curtainWallHeightInches)-1.5]);
               }
               translate([-11.3,0,1.5]) {
-                #cube([1.4,0.9,in2MM(curtainWallHeightInches)-1.5]);
+                cube([1.4,0.9,in2MM(curtainWallHeightInches)-1.5]);
               }
             }
           }
@@ -833,18 +888,9 @@ module case10()
           buttonHole(in2MM(buttonShaftHoleThicknessInches),true);
       }
 
-      // Subtract the power light shaft
+      // Subtract the glowholes
       for (i = glowHoleInfoInches) {
-        translate([in2MM(i[0]),in2MM(i[1]),0]) {
-          buttonHole(in2MM(i[2]));
-#          linear_extrude(height=10) {
-            shrinkFrac = 0.7;
-            circle(in2MM(shrinkFrac*i[2]),$fn=3);
-            rotate([0,0,60])
-              circle(in2MM(shrinkFrac*i[2]),$fn=3);
-          }
-          bevelHole(in2MM(i[2]),13,65); // Ease glowrod insertion a bit
-        }
+        glowHoleShaftIN(i);
       }
 
       // Subtract the embossed labels
@@ -952,12 +998,35 @@ module case10()
   }
 }
 
+module glowHoleTest() {
+  difference() {
+    minPct=107;
+    translate([-1.8,-5.5]) {
+      roundedRect([3,60,faceplateMM[2]], postRadiusMM, false);
+      xyscale=.8;
+      translate([1.5,10.5,-1.5]) {
+        scale([xyscale,xyscale,1]) {
+          rotate([0,0,-90])
+          linear_extrude(height=1.5)
+            text(str("+",minPct-100,"%"),direction="ltr",font="Gillius ADF",halign="center",valign="center");
+        }
+      }
+    }
+    pctSteps=3;
+    for (n = [0:pctSteps]) {
+      i = [0,.4*n+.7,(minPct+0*n)/100.0*(1/8.0),n*90];
+      glowHoleShaftIN(i);
+    }
+  }
+}
+
 $fn=50;
 
 translate([0,0,faceplateMM[2]]) {
   scale([1,1,-1]) {  // Flip for printing face down
     case10();
     *lockingButton();
+    *glowHoleTest();
   }
 }
 
