@@ -16,7 +16,9 @@ m3ScrewHoleDiameterMM=3.4 + 0.1;  // According to internet, plus 0.1
 m3ScrewHoleRadiusMM=m3ScrewHoleDiameterMM/2;
 m3ScrewHeadDiameterMM=5.5 + 0.2;  // 5.5: socket cap; 5.6: narrow 'cheese head'; 5.7: also? socket cap; 6: philips
 m3ScrewHeadRadiusMM=m3ScrewHeadDiameterMM/2;
-m3ScrewHeadCountersinkDepthMM=3.0 + 0.1;  // Makes 25mm screw into 28mm
+//Umm, screw the countersink, we found 28mm screws
+//m3ScrewHeadCountersinkDepthMM=3.0 + 0.1;  // Makes 25mm screw into 28mm
+m3ScrewHeadCountersinkDepthMM=0;
 
 m3MountingHoleOffsetsMM =
   [ // X      Y
@@ -512,16 +514,18 @@ module throughHoleCornerPost(radius, zrot, reverse, finalsubtract)
                 }
               }
               // screw head countersink
-              translate([0,0,toBoardMM-m3ScrewHeadCountersinkDepthMM]) {
-                linear_extrude(height=m3ScrewHeadCountersinkDepthMM+1) {
-                  circle(r=m3ScrewHeadRadiusMM);
+              if (m3ScrewHeadCountersinkDepthMM > 0) {
+                translate([0,0,toBoardMM-m3ScrewHeadCountersinkDepthMM]) {
+                  linear_extrude(height=m3ScrewHeadCountersinkDepthMM+1) {
+                    circle(r=m3ScrewHeadRadiusMM);
+                  }
+                  // slope hole bottom to help bridging
+                  slopeDepthMM = 1;
+                  translate([0,0,-slopeDepthMM]) {
+                    cylinder(r1=m3ScrewHoleRadiusMM,r2=m3ScrewHeadRadiusMM,ht=slopeDepthMM);
+                  }
                 }
-                // slope hole bottom to help bridging
-                slopeDepthMM = 1;
-                #translate([0,0,-slopeDepthMM]) {
-                  cylinder(r1=m3ScrewHoleRadiusMM,r2=m3ScrewHeadRadiusMM,ht=slopeDepthMM);
-                }
-             }
+              }
             } else {
               linear_extrude(height=toBoardMM) {
                 circle(r=radius);
