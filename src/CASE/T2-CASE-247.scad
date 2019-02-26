@@ -97,7 +97,8 @@ debugHeaderInfoInches =
    ];
 
 // curtain walls
-curtainWallThicknessInches = 0.034;
+//curtainWallThicknessInches = 0.034;
+curtainWallThicknessInches = 0.044;
 curtainWallExtraOutsetInches = 0.01;
 curtainWallHeightInches = postHeightInches-0.03;
 curtainWallInfoInches =
@@ -107,14 +108,14 @@ curtainWallInfoInches =
     "MFM", 1.25, 17.1, 9.1, "BitStream Vera Sans Mono:style=bold"], 
    [boardDimInches[0]-.15-.24, boardDimInches[1]-curtainWallThicknessInches, 0.24, 0], // South east curtain wall: x, y, len, rot
    [0.15, boardDimInches[1]-curtainWallThicknessInches, 0.067, 0], // South west curtain wall: x, y, len, rot
-   [1.68, 0.001, .81, 0],     // North curtain wall: x, y, len, rot
+   [1.68, 0.001, .81, 0, ".", 12.9, 9.6, 11],     // North curtain wall: x, y, len, rot
    [0.15, 0, .399, 0],     // North west curtain wall: x, y, len, rot
    [boardDimInches[0]-.46-.15, 0, .46, 0],     // North east curtain wall: x, y, len, rot
    [-2.15, boardDimInches[0]-curtainWallThicknessInches, .83, -90, 
     "T2", 1.25, 10.4, 8.6, "Impact"],     // East curtain wall: x, y, len, rot
    [0.15, -boardDimInches[0], .104, 90],     // East north curtain wall: x, y, len, rot
    [boardDimInches[1]-.23-.15, -boardDimInches[0], .23, 90],     // East south curtain wall: x, y, len, rot
-   [-boardDimInches[1]+.15, 0, 1.15, -90],     // West curtain wall: x, y, len, rot
+   [-boardDimInches[1]+.15, 0, 1.15, -90, ".", 15.0, 16, 13],     // West curtain wall: x, y, len, rot
    [0.15, -curtainWallThicknessInches, .101, 90],     // West north curtain wall: x, y, len, rot
    [.0, 1.963, .38, 0],     // West enet entry curtain wall: x, y, len, rot
 
@@ -141,6 +142,7 @@ buttonShaftHoleThicknessInches = 0.16;
 buttonShaftWallThicknessInches = 0.035;
 buttonShaftLengthInches = postHeightInches - switchHeightInches;
 buttonSurfaceProtrusionInches = 0.13;
+buttonFootShiftMM = 0.5;
 
 buttonShaftDiameterInches = 0.80 * buttonShaftHoleThicknessInches;
 
@@ -376,7 +378,7 @@ module curtainWall(widthMM,emboss,embscale,x,y,rot,font)
   //  echo ("curtainWall ",widthMM,emboss,embscale,x,y,rot);
   thickness = in2MM(curtainWallThicknessInches);
   height = in2MM(curtainWallHeightInches);
-  fudge = 10;
+  fudge = 0;
   difference() {
     cube([widthMM,thickness,height]);
     if (emboss != undef) {
@@ -403,7 +405,7 @@ module curtainWall(widthMM,emboss,embscale,x,y,rot,font)
       }
     }
     for (y = [0+gap : gap : height-gap/2]) {
-      translate([0,0,y]) {
+      translate([0,0.3,y]) {
         cube([widthMM,gap/2,gap/2]);
       }
     }
@@ -623,15 +625,17 @@ module stretcher(thickness,mirror) {
 module lockingButton() {
   translate([0,0,faceplateMM[2]/2]) {
     scale([1,1,-1]) {
-      linear_extrude(height=buttonPlateThicknessMM) {
-        circle(d=buttonPlateDiameterMM);
+      translate([buttonFootShiftMM,0,0]) {
+        linear_extrude(height=buttonPlateThicknessMM) {
+          circle(d=buttonPlateDiameterMM);
+        }
       }
       buttonPusherLengthMM=1.5*buttonPlateDiameterMM;
       buttonPlateRadiusMM = buttonPlateDiameterMM/2;
       buttonShaftRadiusMM = in2MM(buttonShaftDiameterInches)/2;
       buttonPusherWidthMM = buttonPlateDiameterMM;
       rotate([0,0,0])
-      translate([0,buttonPusherLengthMM/2-buttonShaftRadiusMM,buttonPlateThicknessMM/2])
+      translate([buttonFootShiftMM,buttonPusherLengthMM/2-buttonShaftRadiusMM,buttonPlateThicknessMM/2])
         roundedRect([buttonPusherWidthMM,buttonPusherLengthMM,buttonPlateThicknessMM],1.75,true, true);
       linear_extrude(height=in2MM(buttonShaftLengthInches+buttonSurfaceProtrusionInches)) {
         circle(d=in2MM(buttonShaftDiameterInches));
