@@ -1,4 +1,5 @@
 SRCFILES:=$(wildcard *.scad)
+INC_FILES:=$(wildcard *.inc)
 BINDIR:=$(ROOTDIR)/output/stl
 FINAL_STL_FILES:=$(patsubst %.scad,$(BINDIR)/%.stl,$(SRCFILES))
 DRAFT_STL_FILES:=$(patsubst %.scad,$(BINDIR)/%-DRAFT.stl,$(SRCFILES))
@@ -12,7 +13,7 @@ else
   STLFILES:=$(DRAFT_STL_FILES)
 endif
 endif
-ALLDEPS+=Makefile $(ROOTDIR)/common/openscad.mk
+ALLDEPS+=Makefile $(INC_FILES) $(ROOTDIR)/common/openscad.mk
 EPOCH15:=$(shell expr `date +%s` / 1000)
 
 $(BINDIR)/%.stl:	%.scad $(ALLDEPS)
